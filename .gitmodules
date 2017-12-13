@@ -1,0 +1,12 @@
+[submodule "services/api"]
+	path = services/api
+	url = https://github.com/wptide/api.git
+	branch = develop
+[submodule "services/audit-server"]
+	path = services/audit-server
+	url = https://github.com/wptide/audit-server.git
+	branch = develop
+[submodule "services/sync-server"]
+	path = services/sync-server
+	url = https://github.com/wptide/sync-server.git
+	branch = develop

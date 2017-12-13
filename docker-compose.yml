@@ -1,0 +1,205 @@
+version: '3.1'
+
+services:
+
+### API containers ########################################
+    api-redis:
+        image: redis:3.2-alpine
+        restart: on-failure
+        ports:
+            - 6379:6379
+        volumes:
+            - ./data/api/redis:/databases
+        networks:
+            - backend
+
+    api-mysql:
+        build:
+            context: ./services/api
+            dockerfile: ./mysql/Dockerfile
+        restart: on-failure
+        ports:
+            - 3306:3306
+        volumes:
+            - ./data/api/mysql:/var/lib/mysql
+        environment:
+            MYSQL_DATABASE: ${MYSQL_DATABASE}
+            MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+            MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+            MYSQL_USER: ${MYSQL_USER}
+        networks:
+            - backend
+
+    api-nginx:
+        build:
+            context: ./services/api
+            dockerfile: ./nginx/Dockerfile
+        restart: on-failure
+        volumes:
+            - ./logs/api/nginx:/srv/logs/nginx
+            - ./services/api/nginx/conf.d/local.conf:/etc/nginx/conf.d/default.conf:ro
+            - ./services/api/nginx/ssl:/etc/ssl
+            - ./services/api/wordpress:/var/www/html/wordpress
+            - ./services/api/wp-content:/var/www/html/wp-content
+        links:
+            - api-php
+        ports:
+            - 80:80
+            - 443:443
+        networks:
+            - backend
+            - frontend
+
+    api-php:
+        build:
+            context: ./services/api
+            dockerfile: ./php/Dockerfile
+        restart: on-failure
+        links:
+            - api-mysql
+            - api-redis
+        volumes:
+            - ./logs/api/php:/srv/logs/php-fpm
+            - ./logs/api/xdebug:/srv/logs/xdebug
+            - ./services/api/php/build.sh:/usr/local/bin/build.sh
+            - ./services/api/php/conf.d/local.ini:/usr/local/etc/php/conf.d/wordpress.ini:ro
+            - ./services/api/wordpress:/var/www/html/wordpress
+            - ./services/api/wp-content:/var/www/html/wp-content
+        environment:
+            AUTH_KEY: ${AUTH_KEY}
+            AUTH_SALT: ${AUTH_SALT}
+            AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
+            AWS_S3_KEY: ${AWS_S3_KEY}
+            AWS_S3_REGION: ${AWS_S3_REGION}
+            AWS_S3_SECRET: ${AWS_S3_SECRET}
+            AWS_S3_VERSION: ${AWS_S3_VERSION}
+            AWS_SQS_KEY: ${AWS_SQS_KEY}
+            AWS_SQS_QUEUE_NAME: ${AWS_SQS_QUEUE_NAME}
+            AWS_SQS_REGION: ${AWS_SQS_REGION}
+            AWS_SQS_SECRET: ${AWS_SQS_SECRET}
+            AWS_SQS_VERSION: ${AWS_SQS_VERSION}
+            FORCE_SSL_ADMIN: ${FORCE_SSL_ADMIN}
+            LOGGED_IN_KEY: ${LOGGED_IN_KEY}
+            LOGGED_IN_SALT: ${LOGGED_IN_SALT}
+            NONCE_KEY: ${NONCE_KEY}
+            NONCE_SALT: ${NONCE_SALT}
+            PHP_IDE_CONFIG: ${PHP_IDE_CONFIG}
+            SECURE_AUTH_KEY: ${SECURE_AUTH_KEY}
+            SECURE_AUTH_SALT: ${SECURE_AUTH_SALT}
+            TIDE_API_AUTH_URL: ${TIDE_API_AUTH_URL}
+            TIDE_API_KEY: ${TIDE_API_KEY}
+            TIDE_API_SECRET: ${TIDE_API_SECRET}
+            WP_ADMIN_EMAIL: ${WP_ADMIN_EMAIL}
+            WP_ADMIN_PASSWORD: ${WP_ADMIN_PASSWORD}
+            WP_ADMIN_USER: ${WP_ADMIN_USER}
+            WP_DB_HOST: ${WP_DB_HOST}
+            WP_DB_NAME: ${WP_DB_NAME}
+            WP_DB_PASSWORD: ${WP_DB_PASSWORD}
+            WP_DB_PORT: ${WP_DB_PORT}
+            WP_DB_USER: ${WP_DB_USER}
+            WP_DEBUG: ${WP_DEBUG}
+            WP_DESCRIPTION: ${WP_DESCRIPTION}
+            WP_DOMAIN: ${WP_DOMAIN}
+            WP_ENV: ${WP_ENV}
+            WP_REDIS_AUTH: ${WP_REDIS_AUTH}
+            WP_REDIS_DATABASE: ${WP_REDIS_DATABASE}
+            WP_REDIS_HOST: ${WP_REDIS_HOST}
+            WP_REDIS_PORT: ${WP_REDIS_PORT}
+            WP_THEME_NAME: ${WP_THEME_NAME}
+            WP_TITLE: ${WP_TITLE}
+            XDEBUG_CONFIG: ${XDEBUG_CONFIG}
+        command: /bin/ash -c "/usr/local/bin/build.sh && php-fpm"
+        networks:
+            - backend
+
+### Audit Server ##########################################
+    audit-server:
+        build:
+            context: ./services/audit-server
+            dockerfile: ./docker/Dockerfile
+            args:
+                - PUID=1000
+                - PGID=1000
+                - TZ=UTC
+        restart: on-failure
+        environment:
+            AUDIT_EMAIL_SENDER: ${AUDIT_EMAIL_SENDER}
+            AUDIT_SCRIPTS_PATH: ${AUDIT_SCRIPTS_PATH}
+            AUDIT_STANDARDS_PATH: ${AUDIT_STANDARDS_PATH}
+            AUDIT_STATS_PATH: ${AUDIT_STATS_PATH}
+            AUDIT_WEIGHTINGS_PATH: ${AUDIT_WEIGHTINGS_PATH}
+            AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
+            AWS_S3_KEY: ${AWS_S3_KEY}
+            AWS_S3_REGION: ${AWS_S3_REGION}
+            AWS_S3_SECRET: ${AWS_S3_SECRET}
+            AWS_S3_VERSION: ${AWS_S3_VERSION}
+            AWS_SQS_KEY: ${AWS_SQS_KEY}
+            AWS_SQS_QUEUE_NAME: ${AWS_SQS_QUEUE_NAME}
+            AWS_SQS_REGION: ${AWS_SQS_REGION}
+            AWS_SQS_SECRET: ${AWS_SQS_SECRET}
+            AWS_SQS_VERSION: ${AWS_SQS_VERSION}
+            AWS_SQS_LH_KEY: ${AWS_SQS_LH_KEY}
+            AWS_SQS_LH_QUEUE_NAME: ${AWS_SQS_LH_QUEUE_NAME}
+            AWS_SQS_LH_QUEUE_ENABLED: ${AWS_SQS_LH_QUEUE_ENABLED}
+            AWS_SQS_LH_REGION: ${AWS_SQS_LH_REGION}
+            AWS_SQS_LH_SECRET: ${AWS_SQS_LH_SECRET}
+            AWS_SQS_LH_VERSION: ${AWS_SQS_LH_VERSION}
+            MAILER_HOST: ${MAILER_HOST}
+            MAILER_PASSWORD: ${MAILER_PASSWORD}
+            MAILER_TRANSPORT: ${MAILER_TRANSPORT}
+            MAILER_USER: ${MAILER_USER}
+            PHP_IDE_CONFIG: ${PHP_IDE_CONFIG}
+            SECRET: ${SECRET}
+            TIDE_API_AUTH_URL: ${TIDE_API_AUTH_URL}
+            TIDE_API_CONNECT_TIMEOUT: ${TIDE_API_CONNECT_TIMEOUT}
+            TIDE_API_HOST: ${TIDE_API_HOST}
+            TIDE_API_KEY: ${TIDE_API_KEY}
+            TIDE_API_SECRET: ${TIDE_API_SECRET}
+            TIDE_ENV: ${TIDE_ENV}
+            XDEBUG_CONFIG: ${XDEBUG_CONFIG}
+        volumes:
+            - ./data/audit-server:/srv/data
+            - ./logs/audit-server:/srv/logs
+            - ./services/audit-server/bin/dev-build:/usr/local/bin/dev-build
+            - ./services/audit-server:/srv/audit-server
+        ports:
+           - '2222:22'
+        tty: true
+        command: /bin/bash -c "/usr/local/bin/dev-build && composer install --no-interaction && /sbin/my_init"
+        networks:
+            - backend
+
+### Sync Server ###########################################
+    sync-server:
+        build:
+            context: .
+            dockerfile: ./services/sync-server/Dockerfile
+        volumes:
+            - ./data/sync-server:/srv/data
+            - ./services/sync-server:/go/src/github.com/wptide/sync-server
+        environment:
+            AWS_SQS_VERSION: ${AWS_SQS_VERSION}
+            AWS_SQS_REGION: ${AWS_SQS_REGION}
+            AWS_SQS_KEY: ${AWS_SQS_KEY}
+            AWS_SQS_SECRET: ${AWS_SQS_SECRET}
+            AWS_SQS_QUEUE_NAME: ${AWS_SQS_QUEUE_NAME}
+            SYNC_SERVER: ${SYNC_SERVER}
+            SYNC_SERVER_DATA: ${SYNC_SERVER_DATA}
+            SYNC_SERVER_DELAY: ${SYNC_SERVER_DELAY}
+            SYNC_SERVER_FORCE_AUDITS: ${SYNC_SERVER_FORCE_AUDITS}
+            SYNC_SERVER_ITEMS_PER_PAGE: ${SYNC_SERVER_ITEMS_PER_PAGE}
+            SYNC_SERVER_PLUGIN_WORKERS: ${SYNC_SERVER_PLUGIN_WORKERS}
+            SYNC_SERVER_THEME_WORKERS: ${SYNC_SERVER_THEME_WORKERS}
+            SYNC_SERVER_SQS_BUS_SIZE: ${SYNC_SERVER_SQS_BUS_SIZE}
+            TIDE_API_HOST: ${TIDE_API_HOST}
+            TIDE_API_PROTOCOL: ${TIDE_API_PROTOCOL}
+            TIDE_API_VERSION: ${TIDE_API_VERSION}
+        networks:
+            - backend
+
+### Docker networks #######################################
+networks:
+    backend:
+        driver: bridge
+    frontend:
+        driver: bridge
