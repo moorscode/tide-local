@@ -7,10 +7,28 @@ build
 # Logs
 logs/*
 !logs/.gitkeep
+logs/api/*
+!logs/api
+!logs/api/.gitkeep
+logs/audit-server/*
+!logs/audit-server
+!logs/audit-server/.gitkeep
+logs/audit-server/xdebug/*
+!logs/audit-server/xdebug
+!logs/audit-server/xdebug/.gitkeep
 
 # Data
 data/*
 !data/.gitkeep
+data/api/*
+!data/api
+!data/api/.gitkeep
+data/audit-server/*
+!data/audit-server
+!data/audit-server/.gitkeep
+data/sync-server/*
+!data/sync-server
+!data/sync-server/.gitkeep
 
 # Docker
 .env
