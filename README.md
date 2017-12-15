@@ -119,7 +119,7 @@ docker-compose exec audit-server php bin/console tide:audit-server --env=dev -v
 
 ## References  
 
-* [wptide/api](https://github.com/wptide/wp-tide-api)  
+* [wptide/api](https://github.com/wptide/api)  
 * [wptide/audit-server](https://github.com/wptide/audit-server)  
 * [wptide/sync-server](https://github.com/wptide/sync-server)  
 
