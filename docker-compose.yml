@@ -125,6 +125,7 @@ services:
         restart: on-failure
         environment:
             AUDIT_EMAIL_SENDER: ${AUDIT_EMAIL_SENDER}
+            AUDIT_PHPCS_PARALLEL: ${AUDIT_PHPCS_PARALLEL}
             AUDIT_SCRIPTS_PATH: ${AUDIT_SCRIPTS_PATH}
             AUDIT_STANDARDS_PATH: ${AUDIT_STANDARDS_PATH}
             AUDIT_STATS_PATH: ${AUDIT_STATS_PATH}
