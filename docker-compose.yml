@@ -125,10 +125,10 @@ services:
         restart: on-failure
         environment:
             AUDIT_EMAIL_SENDER: ${AUDIT_EMAIL_SENDER}
+            AUDIT_PHPCS_PARALLEL: ${AUDIT_PHPCS_PARALLEL}
             AUDIT_SCRIPTS_PATH: ${AUDIT_SCRIPTS_PATH}
             AUDIT_STANDARDS_PATH: ${AUDIT_STANDARDS_PATH}
             AUDIT_STATS_PATH: ${AUDIT_STATS_PATH}
-            AUDIT_PHPCS_PARALLEL: ${AUDIT_PHPCS_PARALLEL}
             AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME}
             AWS_S3_KEY: ${AWS_S3_KEY}
             AWS_S3_REGION: ${AWS_S3_REGION}
