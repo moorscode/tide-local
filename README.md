@@ -38,17 +38,8 @@ From a new terminal on the host machine:
 
 ```
 sudo cp /private/etc/hosts /private/etc/hosts-backup
-sudo nano /private/etc/hosts
+echo "127.0.0.1 tide.local" >> /private/etc/hosts
 ```
-
-Use the arrow keys to navigate to the bottom of the hosts file and add a new host name.  
-
-```
-127.0.0.1 tide.local
-```
-
-When finished, hit `Control+O` followed by `ENTER/RETURN` to save changes to `/private/etc/hosts`, then hit `Control+X` to exit out of nano.
-
 
 ### Windows Environment
 
