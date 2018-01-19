@@ -38,7 +38,7 @@ From a new terminal on the host machine:
 
 ```
 sudo cp /private/etc/hosts /private/etc/hosts-backup
-echo "127.0.0.1 tide.local" >> /private/etc/hosts
+sudo echo "127.0.0.1 tide.local" >> /private/etc/hosts
 ```
 
 ### Windows Environment
